@@ -9,19 +9,22 @@ use Illuminate\Http\Request;
 class PostController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the user posts.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
+        //the auth user
         $user_id = auth()->user()->id;
+
+        //the model user to use its function
         $user = User::find($user_id);
         return $user->posts;
     }
 
     /**
-     * Display a listing of the resource.
+     * Display a listing of the posts.
      *
      * @return \Illuminate\Http\Response
      */
@@ -38,21 +41,31 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
+        // auth user
         $user = auth()->user();
+        // add the user id to the request
         $request['user_id'] = $user->id;
 
+        //checking request
         $request->validate([
             'title' => 'required',
             'body' => 'required',
             'pic' => 'nullable'
         ]);
-        // inserting all the data on the request
 
+
+
+        // inserting all the data on the request
         return Post::create($request->all());
     }
 
+
+
+
+
+
     /**
-     * Display the specified resource.
+     * Display the specified post.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
@@ -63,7 +76,7 @@ class PostController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified post in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
@@ -96,29 +109,29 @@ class PostController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified post from storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
-        //find the the resource
+        //find the the post
         $post = Post::find($id);
 
-        // if the resource not found
+        // if the post not found
         if (!$post)
             return response([
                 'message' => 'error post not found'
             ]);
-
+        //if the post writer not the auth user
         if ($post->user_id !== auth()->user()->id)
             return response([
                 "message" => "Unauthorized."
             ], 401);
 
-
+        //delete the post
         Post::destroy($id);
-        return response([],204);
+        return response([], 204);
     }
 }
