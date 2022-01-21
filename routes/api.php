@@ -20,14 +20,21 @@ use Illuminate\Support\Facades\Route;
 //auth routs
 Route::post("/register",[AuthController::class,"register"]);
 Route::post('/login',[AuthController::class,'login']);
+
+// تتطلب مستخدم مسجل دخول
 Route::group(['middleware'=>['auth:sanctum']],function () {
     Route::post('/logout',[AuthController::class,'logout']);
     Route::get('/user',[AuthController::class,'profile']);
 });
 
 // posts routs
+Route::get('/post/all',[PostController::class,'index_all']);
+Route::get('/post/{id}',[PostController::class,'show']);
 
-Route::get('/post',[PostController::class,'index']);
+// تتطلب مستخدم مسجل دخول
 Route::group(['middleware'=>['auth:sanctum']],function(){
-Route::apiResource("post",PostController::class);
+    Route::post('/post',[PostController::class,'store']);
+    Route::get('/post',[PostController::class,'index']);
+    Route::put('/post/{id}',[PostController::class,'update']);
+    Route::delete('/post/{id}',[PostController::class,'destroy']);
 });
