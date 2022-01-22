@@ -47,22 +47,21 @@ class PostController extends Controller
         $request['user_id'] = $user->id;
 
         //checking request
-        $request->validate([
+        $post_contant = $request->validate([
             'title' => 'required',
             'body' => 'required',
-            'pic' => 'nullable'
+            'user_id' => 'required',
         ]);
 
+        // inserting post data
+        $post = Post::create($post_contant);
+        if ($request['pic'] !== null) {
+            $request['post_id'] = $post->id;
+            app(ImageController::class)->store($request);
+        }
 
-
-        // inserting all the data on the request
-        return Post::create($request->all());
+        return $post;
     }
-
-
-
-
-
 
     /**
      * Display the specified post.
@@ -72,7 +71,15 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        return Post::find($id);
+        //find the the resource
+        $post = Post::find($id);
+
+        // if the resource not found
+        if (!$post)
+            return response([
+                'message' => 'error post not found'
+            ]);
+        return $post;
     }
 
     /**

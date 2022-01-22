@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\PostController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,4 +38,11 @@ Route::group(['middleware'=>['auth:sanctum']],function(){
     Route::get('/post',[PostController::class,'index']);
     Route::put('/post/{id}',[PostController::class,'update']);
     Route::delete('/post/{id}',[PostController::class,'destroy']);
+
+    //image routs
+    Route::post('/image',[ImageController::class,'store']);
+    Route::get('/image/post/{id}',[ImageController::class,'index']);
+    Route::post('/image/{id}',[ImageController::class,'update']);
+    Route::get('/image/{id}',[ImageController::class,'show']);
+    Route::delete('/image/{id}',[ImageController::class,'destroy']);
 });
