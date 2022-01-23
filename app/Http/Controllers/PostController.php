@@ -18,10 +18,38 @@ class PostController extends Controller
         //the auth user
         $user_id = auth()->user()->id;
 
-        //the model user to use its function
+        //the model user to call its posts
         $user = User::find($user_id);
-        return $user->posts;
+        $to_display = [];
+        foreach($user->posts as $post){
+            array_push($to_display,$this->post_display($post));
+        }
+
+        return $to_display;
     }
+
+
+    /**
+     * help in display posts in specific way
+     *
+     * @return Array
+     */
+    public function post_display($post)
+    {
+        $response = [
+            "id" => $post->id,
+            "title" => $post->title,
+            "body" => $post->body,
+            "created_at" => $post->created_at,
+            "updated_at" =>$post->updated_at,
+            "user_id" => $post->user_id,
+            "username" => $post->user->name
+        ];
+
+        return $response;
+    }
+
+
 
     /**
      * Display a listing of the posts.
@@ -30,7 +58,13 @@ class PostController extends Controller
      */
     public function index_all()
     {
-        return Post::all();
+
+        // تحتاج تحسين بالاداء
+        $to_display = [];
+        foreach(Post::all() as $post){
+            array_push($to_display,$this->post_display($post));
+        }
+      return $to_display;
     }
 
     /**
@@ -45,7 +79,6 @@ class PostController extends Controller
         $user = auth()->user();
         // add the user id to the request
         $request['user_id'] = $user->id;
-
         //checking request
         $post_contant = $request->validate([
             'title' => 'required',
@@ -55,12 +88,8 @@ class PostController extends Controller
 
         // inserting post data
         $post = Post::create($post_contant);
-        if ($request['pic'] !== null) {
-            $request['post_id'] = $post->id;
-            app(ImageController::class)->store($request);
-        }
 
-        return $post;
+        return response(['message'=>"created successfully"],201);
     }
 
     /**
@@ -79,7 +108,7 @@ class PostController extends Controller
             return response([
                 'message' => 'error post not found'
             ]);
-        return $post;
+        return $this->post_display($post);
     }
 
     /**
@@ -104,15 +133,15 @@ class PostController extends Controller
             return response([
                 'message' => 'error ' . $id . ' not found'
             ]);
-
+        // check if the auth user is the same user
         if ($post->user_id !== auth()->user()->id)
-            return response([
-                "message" => "Unauthorized."
-            ], 401);
+        return response([
+            "message" => "Forbidden."
+        ], 403);
         //update the resource
         $post->update($request->all());
 
-        return $post;
+        return response(['message'=>"updated successfully"], 204);
     }
 
     /**
@@ -134,11 +163,15 @@ class PostController extends Controller
         //if the post writer not the auth user
         if ($post->user_id !== auth()->user()->id)
             return response([
-                "message" => "Unauthorized."
-            ], 401);
+                "message" => "Forbidden."
+            ], 403);
+        $images =  $post->images;
+        foreach ($images as $image) {
+            app(ImageController::class)->destroy($image->id);
+        }
 
         //delete the post
         Post::destroy($id);
-        return response([], 204);
+        return response(['message'=>"deleted successfully"], 204);
     }
 }

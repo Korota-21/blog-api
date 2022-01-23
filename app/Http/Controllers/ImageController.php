@@ -40,13 +40,32 @@ class ImageController extends Controller
             "post_id" => 'required',
             'pic' => 'required|image|nullable|max:1999',
         ]);
+        //find the the post
+        $post = Post::find($request['post_id']);
+
+        // if the post not found
+        if (!$post)
+            return response([
+                'message' => 'error post not found'
+            ]);
+        // check if the auth user is the same user
+        if ($post->user_id !== auth()->user()->id)
+            return response([
+                "message" => "Forbidden."
+            ], 403);
+        $imageCount = count($post->images);
+        if ($imageCount >= 4) {
+            return response([
+                'message' => 'you can not add more than 4 images in a post'
+            ]);
+        }
         // resize and uploud Image
         $imagename = $this->resize($request);
         Image::create([
             'name' => $imagename,
             'post_id' => $request['post_id'],
         ]);
-        return response([], 201);
+        return response(['message'=>"created successfully"], 201);
     }
 
     /**
@@ -127,7 +146,12 @@ class ImageController extends Controller
             return response([
                 'message' => 'error image not found'
             ]);
-
+        $post = $image->post;
+        // check if the auth user is the same user
+        if ($post->user_id !== auth()->user()->id)
+            return response([
+                "message" => "Forbidden."
+            ], 403);
         //delete the old image
         Storage::delete('public/image/' . $image->name);
 
@@ -137,7 +161,7 @@ class ImageController extends Controller
         //save the new name in DB
         $image->update(["name" => $imagename]);
 
-        return response([],204);
+        return response(['message'=>"updated successfully"], 204);
     }
 
 
@@ -157,13 +181,17 @@ class ImageController extends Controller
             return response([
                 'message' => 'error image not found'
             ]);
-
+        $post = $image->post;
+        // check if the auth user is the same user
+        if ($post->user_id !== auth()->user()->id)
+            return response([
+                "message" => "Forbidden."
+            ], 403);
         //delete the image
         Storage::delete('public/image/' . $image->name);
 
         // delete the image in DB
         Image::destroy($id);
-        return response([],204);
-
+        return response(['message'=>"deleted successfully"], 204);
     }
 }
