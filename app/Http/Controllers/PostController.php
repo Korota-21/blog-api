@@ -5,24 +5,33 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
     /**
      * Display a listing of the user posts.
-     *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function myindex(Request $request)
     {
-        //the auth user
+        $page = 1;
+        if ($request['page']) {
+            $page = $request['page'];
+        };
+        $skip = 0;
+        if ($page > 1) {
+            $skip = ($page - 1) * 10;
+        }
+        //from auth user
         $user_id = auth()->user()->id;
 
         //the model user to call its posts
-        $user = User::find($user_id);
+        $posts = Post::all()->where('user_id', "=", $user_id)->skip($skip)->take(10);
         $to_display = [];
-        foreach($user->posts as $post){
-            array_push($to_display,$this->post_display($post));
+        foreach ($posts as $post) {
+            array_push($to_display, $this->post_display($post));
         }
 
         return $to_display;
@@ -31,7 +40,7 @@ class PostController extends Controller
 
     /**
      * help in display posts in specific way
-     *
+     * @param object  $post
      * @return Array
      */
     public function post_display($post)
@@ -40,10 +49,10 @@ class PostController extends Controller
             "id" => $post->id,
             "title" => $post->title,
             "body" => $post->body,
-            "created_at" => $post->created_at,
-            "updated_at" =>$post->updated_at,
             "user_id" => $post->user_id,
-            "username" => $post->user->name
+            "username" => $post->user->name,
+            "created_at" => $post->created_at,
+            "updated_at" => $post->updated_at,
         ];
 
         return $response;
@@ -54,17 +63,27 @@ class PostController extends Controller
     /**
      * Display a listing of the posts.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index_all()
+    public function index_all(Request $request)
     {
-
-        // تحتاج تحسين بالاداء
-        $to_display = [];
-        foreach(Post::all() as $post){
-            array_push($to_display,$this->post_display($post));
+        //Page system
+        $page = 1;
+        if ($request['page']) {
+            $page = $request['page'];
+        };
+        $skip = 0;
+        if ($page > 1) {
+            $skip = ($page - 1) * 10;
         }
-      return $to_display;
+        $to_display = [];
+        $posts = Post::all()->skip($skip)->take(10);
+        return $posts;
+        foreach ($posts as $post) {
+            array_push($to_display, $this->post_display($post));
+        }
+        return $to_display;
     }
 
     /**
@@ -89,7 +108,7 @@ class PostController extends Controller
         // inserting post data
         $post = Post::create($post_contant);
 
-        return response(['message'=>"created successfully"],201);
+        return response(['message' => "created successfully"], 201);
     }
 
     /**
@@ -135,13 +154,13 @@ class PostController extends Controller
             ]);
         // check if the auth user is the same user
         if ($post->user_id !== auth()->user()->id)
-        return response([
-            "message" => "Forbidden."
-        ], 403);
+            return response([
+                "message" => "Forbidden."
+            ], 403);
         //update the resource
         $post->update($request->all());
 
-        return response(['message'=>"updated successfully"], 204);
+        return response(['message' => "updated successfully"], 204);
     }
 
     /**
@@ -172,6 +191,6 @@ class PostController extends Controller
 
         //delete the post
         Post::destroy($id);
-        return response(['message'=>"deleted successfully"], 204);
+        return response(['message' => "deleted successfully"], 204);
     }
 }

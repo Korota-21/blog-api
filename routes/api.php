@@ -35,7 +35,7 @@ Route::get('/post/{id}',[PostController::class,'show']);
 // تتطلب مستخدم مسجل دخول
 Route::group(['middleware'=>['auth:sanctum']],function(){
     Route::post('/post',[PostController::class,'store']);
-    Route::get('/post',[PostController::class,'index']);
+    Route::get('/myposts/',[PostController::class,'myindex']);
     Route::put('/post/{id}',[PostController::class,'update']);
     Route::delete('/post/{id}',[PostController::class,'destroy']);
 
