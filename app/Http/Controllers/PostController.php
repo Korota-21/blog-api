@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
@@ -16,6 +15,7 @@ class PostController extends Controller
      */
     public function myindex(Request $request)
     {
+        //page system
         $page = 1;
         if ($request['page']) {
             $page = $request['page'];
@@ -27,7 +27,6 @@ class PostController extends Controller
         //from auth user
         $user_id = auth()->user()->id;
 
-        //the model user to call its posts
         $posts = Post::all()->where('user_id', "=", $user_id)->skip($skip)->take(10);
         $to_display = [];
         foreach ($posts as $post) {
@@ -80,6 +79,39 @@ class PostController extends Controller
         $to_display = [];
         $posts = Post::all()->skip($skip)->take(10);
         return $posts;
+        foreach ($posts as $post) {
+            array_push($to_display, $this->post_display($post));
+        }
+        return $to_display;
+    }
+
+    /**
+     * Display a list of user posts.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+        $request->validate([
+            'user_id'=>'required'
+        ]);
+        $user = User::find($request['user_id']);
+        if (!$user)
+        return response([
+            'message' => 'error user not found'
+        ]);
+        //Page system
+        $page = 1;
+        if ($request['page']) {
+            $page = $request['page'];
+        };
+        $skip = 0;
+        if ($page > 1) {
+            $skip = ($page - 1) * 10;
+        }
+        $to_display = [];
+        $posts = $user->posts->skip($skip)->take(10);
         foreach ($posts as $post) {
             array_push($to_display, $this->post_display($post));
         }

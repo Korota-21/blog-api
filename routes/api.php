@@ -31,6 +31,7 @@ Route::group(['middleware'=>['auth:sanctum']],function () {
 // posts routs
 Route::get('/post/all',[PostController::class,'index_all']);
 Route::get('/post/{id}',[PostController::class,'show']);
+Route::get('/userposts/',[PostController::class,'index']);
 
 // تتطلب مستخدم مسجل دخول
 Route::group(['middleware'=>['auth:sanctum']],function(){
