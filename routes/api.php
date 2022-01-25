@@ -3,8 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\PostController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,31 +18,40 @@ use Illuminate\Support\Facades\Route;
 */
 
 //auth routs
-Route::post("/register",[AuthController::class,"register"]);
-Route::post('/login',[AuthController::class,'login']);
+Route::post("/register", [AuthController::class, "register"]);
+Route::post('/login', [AuthController::class, 'login']);
 
 // تتطلب مستخدم مسجل دخول
-Route::group(['middleware'=>['auth:sanctum']],function () {
-    Route::post('/logout',[AuthController::class,'logout']);
-    Route::get('/user',[AuthController::class,'profile']);
+Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/users', [UserController::class, 'usersList']);
+    Route::get('/users/{id}', [UserController::class, 'profile']);
 });
 
 // posts routs
-Route::get('/post/all',[PostController::class,'index_all']);
-Route::get('/post/{id}',[PostController::class,'show']);
-Route::get('/userposts/',[PostController::class,'index']);
 
-// تتطلب مستخدم مسجل دخول
-Route::group(['middleware'=>['auth:sanctum']],function(){
-    Route::post('/post',[PostController::class,'store']);
-    Route::get('/myposts/',[PostController::class,'myindex']);
-    Route::put('/post/{id}',[PostController::class,'update']);
-    Route::delete('/post/{id}',[PostController::class,'destroy']);
-
-    //image routs
-    Route::post('/image',[ImageController::class,'store']);
-    Route::post('/image/{id}',[ImageController::class,'update']);
-    Route::delete('/image/{id}',[ImageController::class,'destroy']);
+Route::group(["prefix" => "post"], function () {
+    //all specific user posts
+    Route::get('user/{user_id}', [PostController::class, 'index']);
+    //all posts
+    Route::get('/list', [PostController::class, 'index_all']);
+    Route::get('/{id}', [PostController::class, 'show']);
+    // تتطلب مستخدم مسجل دخول
+    Route::group(['middleware' => ['auth:sanctum']], function () {
+        Route::post('', [PostController::class, 'store']);
+        Route::put('/{id}', [PostController::class, 'update']);
+        Route::delete('/{id}', [PostController::class, 'destroy']);
+    });
 });
-Route::get('/image/post/{id}',[ImageController::class,'index']);
-Route::get('/image/{id}',[ImageController::class,'show']);
+
+//image routs
+Route::group(["prefix" => "image"], function () {
+    Route::get('/post/{id}', [ImageController::class, 'index']);
+    Route::get('/{id}', [ImageController::class, 'show']);
+    // تتطلب مستخدم مسجل دخول
+    Route::group(['middleware' => ['auth:sanctum']], function () {
+        Route::post('/', [ImageController::class, 'store']);
+        Route::post('/{id}', [ImageController::class, 'update']);
+        Route::delete('/{id}', [ImageController::class, 'destroy']);
+    });
+});

@@ -9,16 +9,6 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
 
-    public function profile(){
-        $user =auth()->user();
-        $response = [
-            'name' => $user->name,
-            'email' =>$user->email
-        ];
-        return $response;
-    }
-
-
     public function register(Request $request)
     {
         $fields = $request->validate([

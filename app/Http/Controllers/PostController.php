@@ -8,33 +8,6 @@ use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    /**
-     * Display a listing of the user posts.
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function myindex(Request $request)
-    {
-        //page system
-        $page = 1;
-        if ($request['page']) {
-            $page = $request['page'];
-        };
-        $skip = 0;
-        if ($page > 1) {
-            $skip = ($page - 1) * 10;
-        }
-        //from auth user
-        $user_id = auth()->user()->id;
-
-        $posts = Post::all()->where('user_id', "=", $user_id)->skip($skip)->take(10);
-        $to_display = [];
-        foreach ($posts as $post) {
-            array_push($to_display, $this->post_display($post));
-        }
-
-        return $to_display;
-    }
 
 
     /**
@@ -42,7 +15,7 @@ class PostController extends Controller
      * @param object  $post
      * @return Array
      */
-    public function post_display($post)
+    function post_display($post)
     {
         $response = [
             "id" => $post->id,
@@ -78,7 +51,6 @@ class PostController extends Controller
         }
         $to_display = [];
         $posts = Post::all()->skip($skip)->take(10);
-        return $posts;
         foreach ($posts as $post) {
             array_push($to_display, $this->post_display($post));
         }
@@ -91,12 +63,10 @@ class PostController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request, $user_id)
     {
-        $request->validate([
-            'user_id'=>'required'
-        ]);
-        $user = User::find($request['user_id']);
+
+        $user = User::find($user_id);
         if (!$user)
         return response([
             'message' => 'error user not found'
