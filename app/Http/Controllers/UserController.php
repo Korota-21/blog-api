@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -45,13 +43,7 @@ class UserController extends Controller
         if (!$user) {
             return response(["message" => "user is not found"]);
         }
-        if (Auth()->user()->id == $id)
             return $user;
-        return response([
-            "id" => $user->id,
-            "name" => $user->name,
-            "created_at" => $user->created_at,
 
-        ]);
     }
 }
