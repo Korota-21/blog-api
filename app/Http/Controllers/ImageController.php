@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Image;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\View;
+
 use App\Models\Post;
+use Facade\FlareClient\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use ImageIn;
@@ -65,7 +69,7 @@ class ImageController extends Controller
             'name' => $imagename,
             'post_id' => $request['post_id'],
         ]);
-        return response(['message'=>"created successfully"], 201);
+        return response(['message' => "created successfully"], 201);
     }
 
     /**
@@ -120,13 +124,13 @@ class ImageController extends Controller
     {
         //find the the resource
         $image = Image::find($id);
-
+        //return $name->name;
         // if the resource not found
         if (!$image)
             return response([
                 'message' => 'error image not found'
             ]);
-        return $image;
+        return asset('storage/image/' . $image->name);
     }
 
     /**
@@ -161,7 +165,7 @@ class ImageController extends Controller
         //save the new name in DB
         $image->update(["name" => $imagename]);
 
-        return response(['message'=>"updated successfully"], 204);
+        return response(['message' => "updated successfully"], 204);
     }
 
 
@@ -192,6 +196,6 @@ class ImageController extends Controller
 
         // delete the image in DB
         Image::destroy($id);
-        return response(['message'=>"deleted successfully"], 204);
+        return response(['message' => "deleted successfully"], 204);
     }
 }
