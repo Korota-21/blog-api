@@ -17,10 +17,16 @@ class PostController extends Controller
      */
     function post_display($post)
     {
+        $images = $post->images;
+        $images_URLs = [];
+        foreach ($images as $image) {
+            array_push($images_URLs, asset('storage/image/' . $image->name));
+        }
         $response = [
             "id" => $post->id,
             "title" => $post->title,
             "body" => $post->body,
+            "images" => $images_URLs,
             "user_id" => $post->user_id,
             "username" => $post->user->name,
             "created_at" => $post->created_at,
@@ -68,9 +74,9 @@ class PostController extends Controller
 
         $user = User::find($user_id);
         if (!$user)
-        return response([
-            'message' => 'error user not found'
-        ]);
+            return response([
+                'message' => 'error user not found'
+            ]);
         //Page system
         $page = 1;
         if ($request['page']) {
@@ -129,6 +135,8 @@ class PostController extends Controller
             return response([
                 'message' => 'error post not found'
             ]);
+
+
         return $this->post_display($post);
     }
 
@@ -180,12 +188,15 @@ class PostController extends Controller
         if (!$post)
             return response([
                 'message' => 'error post not found'
-            ]);
+            ], 404);
+
         //if the post writer not the auth user
         if ($post->user_id !== auth()->user()->id)
             return response([
                 "message" => "Forbidden."
             ], 403);
+
+        //delete all post's images
         $images =  $post->images;
         foreach ($images as $image) {
             app(ImageController::class)->destroy($image->id);

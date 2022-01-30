@@ -29,7 +29,12 @@ class ImageController extends Controller
             return response([
                 'message' => 'error post not found'
             ]);
-        return $post->Images;
+            $images = $post->images;
+        $images_URLs = [];
+        foreach($images as $image){
+            array_push($images_URLs,asset('storage/image/' . $image->name));
+        }
+        return $images_URLs;
     }
 
     /**

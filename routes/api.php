@@ -34,7 +34,7 @@ Route::group(["prefix" => "post"], function () {
     //all specific user posts
     Route::get('user/{user_id}', [PostController::class, 'index']);
     //all posts
-    Route::get('/list', [PostController::class, 'index_all']);
+    Route::get('/all', [PostController::class, 'index_all']);
     Route::get('/{id}', [PostController::class, 'show']);
     // تتطلب مستخدم مسجل دخول
     Route::group(['middleware' => ['auth:sanctum']], function () {
