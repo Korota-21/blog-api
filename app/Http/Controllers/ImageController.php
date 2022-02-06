@@ -3,11 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Image;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\View;
-
 use App\Models\Post;
-use Facade\FlareClient\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use ImageIn;
@@ -28,7 +24,7 @@ class ImageController extends Controller
         if (!$post)
             return response([
                 'message' => 'error post not found'
-            ]);
+            ],404);
             $images = $post->images;
         $images_URLs = [];
         foreach($images as $image){
@@ -56,7 +52,7 @@ class ImageController extends Controller
         if (!$post)
             return response([
                 'message' => 'error post not found'
-            ]);
+            ],404);
         // check if the auth user is the same user
         if ($post->user_id !== auth()->user()->id)
             return response([
@@ -74,7 +70,7 @@ class ImageController extends Controller
             'name' => $imagename,
             'post_id' => $request['post_id'],
         ]);
-        return response(['message' => "created successfully"], 201);
+        return response(['message' => "uplouded successfully"], 201);
     }
 
     /**
@@ -134,7 +130,7 @@ class ImageController extends Controller
         if (!$image)
             return response([
                 'message' => 'error image not found'
-            ]);
+            ],404);
         return asset('storage/image/' . $image->name);
     }
 

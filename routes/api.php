@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 //auth routs
 Route::post("/register", [AuthController::class, "register"]);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('is_login/{id}', [UserController::class, 'is_login']);
 
 // تتطلب مستخدم مسجل دخول
 Route::group(['middleware' => ['auth:sanctum']], function () {
@@ -29,7 +31,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 });
 
 // posts routs
-
 Route::group(["prefix" => "post"], function () {
     //all specific user posts
     Route::get('user/{user_id}', [PostController::class, 'index']);
@@ -41,6 +42,17 @@ Route::group(["prefix" => "post"], function () {
         Route::post('', [PostController::class, 'store']);
         Route::put('/{id}', [PostController::class, 'update']);
         Route::delete('/{id}', [PostController::class, 'destroy']);
+        Route::post('/{post_id}/comment', [CommentController::class, 'store']);
+    });
+});
+//comment routs
+Route::group(["prefix" => "comment"], function () {
+    Route::get('/', [CommentController::class, 'index']);
+    Route::get('/{id}', [CommentController::class, 'show']);
+    // تتطلب مستخدم مسجل دخول
+    Route::group(['middleware' => ['auth:sanctum']], function () {
+        Route::put('/{id}', [CommentController::class, 'update']);
+        Route::delete('/{id}', [CommentController::class, 'destroy']);
     });
 });
 

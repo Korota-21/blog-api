@@ -46,4 +46,28 @@ class UserController extends Controller
             return $user;
 
     }
+
+    /**
+     * check if the specified user is login.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function is_login($id)
+    {
+        $user = User::find($id);
+        if (!$user)
+            return response([
+                'message' => 'error user not found'
+            ],404);
+        $tt = [];
+        foreach ($user->tokens as $token) {
+            array_push($tt, $token);
+        }
+        $state = !empty($tt);
+        return
+            response([
+                "is_loggin" => $state,
+            ]);
+    }
 }
