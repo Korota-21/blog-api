@@ -23,11 +23,11 @@ class Comment extends Model
         return $this->belongsTo(Post::class);
     }
     function parentComment(){
-        // need test
+
         return $this->hasOne(Comment::class,"id","parent_id");
     }
-    function childComment(){
-        // need test
+    function childComments(){
+
         return $this->hasMany(Comment::class,"parent_id","id");
     }
 }

@@ -160,7 +160,7 @@ class PostController extends Controller
         // if the resource not found
         if (!$post)
             return response([
-                'message' => 'error ' . $id . ' not found'
+                'message' => 'error post not found'
             ]);
         // check if the auth user is the same user
         if ($post->user_id !== auth()->user()->id)

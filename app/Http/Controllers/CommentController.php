@@ -59,7 +59,7 @@ class CommentController extends Controller
 
 
     /**
-     * Display a list of post comment.
+     * Display a list of comments.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -92,7 +92,7 @@ class CommentController extends Controller
             ]);
             $comments =$post->comments->where("parent_id" , "=" , null)->skip($skip)->take(10);
             foreach ($comments as $comment) {
-                 $comment->childComment;
+                 $comment->childComments;
             }
         }else{
             return response([
@@ -102,4 +102,91 @@ class CommentController extends Controller
 
         return $comments;
     }
+
+ /**
+     * Display the specified comment.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //find the the resource
+        $comment = Comment::find($id);
+
+        // if the resource not found
+        if (!$comment)
+            return response([
+                'message' => 'error comment not found'
+            ]);
+            $comment->childComments;
+
+        return $comment;
+    }
+
+ /**
+     * Update the specified post in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'content' => 'string',
+
+        ]);
+        //find the the resource
+        $comment = Comment::find($id);
+
+        // if the resource not found
+        if (!$comment)
+            return response([
+                'message' => 'error comment not found'
+            ]);
+        // check if the auth user is the same user
+        if ($comment->user_id !== auth()->user()->id)
+            return response([
+                "message" => "Forbidden."
+            ], 403);
+        //update the resource
+        $comment->update($request->all());
+
+        return response(['message' => "updated successfully"], 204);
+    }
+
+     /**
+     * Remove the specified post from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //find the the comment
+        $comment = Comment::find($id);
+        // if the comment not found
+        if (!$comment)
+            return response([
+                'message' => 'error comment not found'
+            ], 404);
+
+        //if the comment writer not the auth user
+        if ($comment->user_id !== auth()->user()->id)
+            return response([
+                "message" => "Forbidden."
+            ], 403);
+
+        //delete all comment's children
+        $comentChildren =  $comment->childComments;
+        foreach ($comentChildren as $childcomment) {
+            $childcomment->delete();
+        }
+
+        //delete the post
+        Comment::destroy($id);
+        return response(['message' => "deleted successfully"], 204);
+    }
+
 }
