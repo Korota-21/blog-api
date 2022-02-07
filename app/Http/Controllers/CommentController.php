@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
+use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
@@ -31,6 +33,7 @@ class CommentController extends Controller
         if ($req_contant['parent_id']) {
             $parent_comment = Comment::find($req_contant['parent_id']);
             // check if the parent comment belongs to the same post
+
             if ($parent_comment->post->id != $req_contant['post_id']) {
                 return response(
                     [
@@ -38,6 +41,13 @@ class CommentController extends Controller
                     ]
                 ,422);
             }
+
+            // // check if the parent comment has a parent comment
+            // if ($parent_comment->parent_id != null) {
+            //     // let the comment take the same parent of it's inserted parent
+            //     $req_contant['parent_id'] = $parent_comment->parent_id;
+            // }
+
         }
         // inserting post data
         $comment = Comment::create($req_contant);
@@ -66,11 +76,30 @@ class CommentController extends Controller
         if ($page > 1) {
             $skip = ($page - 1) * 10;
         }
-        $to_display = [];
-        $posts = [];
-        foreach ($posts as $post) {
-            array_push($to_display, $this->post_display($post));
+        $comments = [];
+        if($request['user_id']){
+            $user = User::find($request['user_id']);
+            if (!$user)
+            return response([
+                'message' => 'error user not found'
+            ]);
+            $comments =$user->comments->where("parent_id" , "=" , null)->skip($skip)->take(10);
+        }else if($request['post_id']){
+            $post = Post::find($request['post_id']);
+            if (!$post)
+            return response([
+                'message' => 'error post not found'
+            ]);
+            $comments =$post->comments->where("parent_id" , "=" , null)->skip($skip)->take(10);
+            foreach ($comments as $comment) {
+                 $comment->childComment;
+            }
+        }else{
+            return response([
+                "message"=>"insert user_id or post_id as query"
+            ],424);
         }
-        return $to_display;
+
+        return $comments;
     }
 }

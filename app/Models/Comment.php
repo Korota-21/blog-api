@@ -26,4 +26,8 @@ class Comment extends Model
         // need test
         return $this->hasOne(Comment::class,"id","parent_id");
     }
+    function childComment(){
+        // need test
+        return $this->hasMany(Comment::class,"parent_id","id");
+    }
 }
