@@ -32,20 +32,18 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 // posts routs
 Route::group(["prefix" => "post"], function () {
-    //all specific user posts
-    Route::get('user/{user_id}', [PostController::class, 'index']);
-    //all posts
-    Route::get('/all', [PostController::class, 'index_all']);
+    //all posts or user's posts
+    Route::get('user', [PostController::class, 'index']);
     Route::get('/{id}', [PostController::class, 'show']);
     // تتطلب مستخدم مسجل دخول
     Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('', [PostController::class, 'store']);
         Route::put('/{id}', [PostController::class, 'update']);
         Route::delete('/{id}', [PostController::class, 'destroy']);
+        //comment routs
         Route::post('/{post_id}/comment', [CommentController::class, 'store']);
     });
 });
-//comment routs
 Route::group(["prefix" => "comment"], function () {
     Route::get('/', [CommentController::class, 'index']);
     Route::get('/{id}', [CommentController::class, 'show']);

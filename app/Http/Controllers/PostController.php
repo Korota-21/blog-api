@@ -37,46 +37,15 @@ class PostController extends Controller
     }
 
 
-
-    /**
-     * Display a listing of the posts.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function index_all(Request $request)
-    {
-        //Page system
-        $page = 1;
-        if ($request['page']) {
-            $page = $request['page'];
-        };
-        $skip = 0;
-        if ($page > 1) {
-            $skip = ($page - 1) * 10;
-        }
-        $to_display = [];
-        $posts = Post::all()->skip($skip)->take(10);
-        foreach ($posts as $post) {
-            array_push($to_display, $this->post_display($post));
-        }
-        return $to_display;
-    }
-
     /**
      * Display a list of user posts.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, $user_id)
+    public function index(Request $request)
     {
 
-        $user = User::find($user_id);
-        if (!$user)
-            return response([
-                'message' => 'error user not found'
-            ]);
         //Page system
         $page = 1;
         if ($request['page']) {
@@ -86,8 +55,22 @@ class PostController extends Controller
         if ($page > 1) {
             $skip = ($page - 1) * 10;
         }
+
+        $posts = [];
+        if($request['user_id']){
+            $user = User::find($request['user_id']);
+            if (!$user)
+            return response([
+                'message' => 'error user not found'
+            ]);
+            $posts =$user->posts->skip($skip)->take(10);
+
+        }else{
+            $posts = Post::all();
+        }
+
+
         $to_display = [];
-        $posts = $user->posts->skip($skip)->take(10);
         foreach ($posts as $post) {
             array_push($to_display, $this->post_display($post));
         }
